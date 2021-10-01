@@ -160,48 +160,41 @@ rad_avp_update_message_authenticator(char * avp_message_authenticator, const rad
 }
 
 char *
-rad_avp_append_chap_password(FILE * out_file, unsigned t, const char * value, char * cp)
+rad_avp_append_chap_password(rad_script_context_t * ctx, unsigned t, const char * value, char * cp)
 {
-
-  uint8_t *p;
   size_t len, len2;
-
-  len = len2 = strlen(value);
-  if (len2 < 17) len2 = 17;
-  //p==output
-  memcpy(p, value, len);
-
-  cp[0] = t;
-  //len need to be calculated again
-  // value === password
-  //
-  cp[1] = 17 + 2;  //need to recalculate
-
-
   int             i;
   uint8_t         *ptr;
   uint8_t         string[MAX_STRING_LEN * 2 + 1];
   int id;
+  //len need to be calculated again
+  // value === password
+   cp[0] = t;
+   cp[1] = 17 + 2;  //always len 19 for chap type(1)len(1)id(1)hash(16)
+
    id =  rand() & 0xff;
    i = 0;
 
-   ptr = string;
-   *ptr++ = id;
-   *cp = id ; //set chap ID
+   len = strlen(value);
 
+   ptr = string;
+   memcpy(cp+2, value, len);
+   cp[2] = id ; //set chap ID
+   *ptr++ = id;
    i++;
-   //memcpy(ptr, password->vp_strvalue, password->length);
-   memcpy(ptr, value, strlen(value));
-   ptr += strlen(value);
-   i += strlen(value);
+
+   memcpy(ptr, value, len);
+   ptr += len;
+   i += len;
+
 
    /*
     *      Request Authenticator .
     */
-    //memcpy(ptr, packet->vector, AUTH_VECTOR_LEN); //msg authenticator
+    memcpy(ptr, ctx->rad_header->authenticator, AUTH_VECTOR_LEN); //msg authenticator
     i += AUTH_VECTOR_LEN;
 
-   rad_calculate_md5(cp+1, i, string);
+   rad_calculate_md5(string, i, cp+3);
 
    cp += cp[1];
    return cp;
