@@ -27,7 +27,7 @@ rad_open_socket(rad_script_context_t * ctx)
     radcl_printf(ctx, "Error: cannot create udp socket\n");
     radcl_exit(ctx, 1);
   }
-    
+
   if (ctx->local_ip != INADDR_ANY || ctx->local_udp_port) {
     optval = 1;
     setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
@@ -46,7 +46,7 @@ rad_open_socket(rad_script_context_t * ctx)
   ctx->s = s;
 }
 
-int 
+int
 fetch_line(rad_script_context_t * ctx, char ** field_p, char ** value_p)
 {
   int    i;
@@ -58,7 +58,7 @@ fetch_line(rad_script_context_t * ctx, char ** field_p, char ** value_p)
     radcl_printf(ctx, ctx->input_prompt);
     fflush(ctx->out_file);
   }
-  
+
   if (radcl_gets(ctx, ctx->line, sizeof(ctx->line)) == NULL) {
     radcl_printf(ctx, "\n");
     return -1;
@@ -72,13 +72,13 @@ fetch_line(rad_script_context_t * ctx, char ** field_p, char ** value_p)
   while (*field != 0 && isspace(*field)) {
     field ++;
   }
-  
+
   if (*field == '#' || *field == 0) {
     return 0;
   }
 
   for (i = 0; field[i] != 0 && field[i] != '=' && field[i] != '\n' && field[i] != '#'; i++) {
-  } 
+  }
 
   if (field[i] != '=') {
     field[i] = 0;
@@ -100,7 +100,7 @@ fetch_line(rad_script_context_t * ctx, char ** field_p, char ** value_p)
     while (last > field && isspace(*last)) {
       last --;
     }
-  
+
     if (last < field) {
       field = NULL;
     } else {
@@ -139,13 +139,13 @@ fetch_line(rad_script_context_t * ctx, char ** field_p, char ** value_p)
   return 1;
 }
 
-void 
-rad_script_init_context(rad_script_context_t * ctx, 
-			FILE * in_file, 
-			FILE * out_file, 
-			long remote_ip, 
-			short remote_udp_port, 
-			long local_ip, 
+void
+rad_script_init_context(rad_script_context_t * ctx,
+			FILE * in_file,
+			FILE * out_file,
+			long remote_ip,
+			short remote_udp_port,
+			long local_ip,
 			short local_udp_port)
 {
   memset(ctx, 0, sizeof(*ctx));
@@ -187,7 +187,7 @@ rad_rx_packet(rad_script_context_t * ctx)
     ret = recvfrom(ctx->s, ctx->rx_buf, sizeof(ctx->rx_buf), MSG_DONTWAIT, (struct sockaddr *) &si_source, &sock_len);
     if (ret <= 0) {
       usleep(RAD_RX_SLEEP_USECONDS);
-    } else if ((sock_len == sizeof(si_source) && memcmp(&ctx->si_other, &si_source, sizeof(si_source)) == 0) || 
+    } else if ((sock_len == sizeof(si_source) && memcmp(&ctx->si_other, &si_source, sizeof(si_source)) == 0) ||
 	       ctx->si_other.sin_addr.s_addr == htonl(0x7f000001) /* don't check source if talking to server at loopback address */) {
       ctx->rx_buf_len = ret;
       break;
@@ -231,8 +231,8 @@ rad_decode_packet(rad_script_context_t * ctx)
       radcl_printf(ctx, "Info: ignore old packet\n");
       return 1;
     } else {
-      radcl_printf(ctx, "Error: invalid packet_identifier. expect=%u header->packet_identifier=%u\n", 
-		   ctx->packet_identifier, 
+      radcl_printf(ctx, "Error: invalid packet_identifier. expect=%u header->packet_identifier=%u\n",
+		   ctx->packet_identifier,
 		   ctx->rad_header->packet_identifier);
       radcl_exit(ctx, 1);
     }
@@ -321,6 +321,8 @@ rad_run_script(rad_script_context_t * ctx)
       continue;
     }
 
+    radcl_printf(ctx, "# COMMAND IS <%s>\n",field );
+
     if (strcmp(field, "Open") == 0) {
       rad_open_socket(ctx);
       memset((char *) &ctx->si_other, 0, sizeof(ctx->si_other));
@@ -384,7 +386,7 @@ rad_run_script(rad_script_context_t * ctx)
       cp = rad_avp_append_string(ctx->out_file, RAD_AVP_CONNECT_INFO, value, cp);
     } else if (strcmp(field, "AVP:Message-Authenticator") == 0) {
       if (strcmp(value, "Auto") == 0) {
-	ctx->avp_message_authenticator = cp;
+	ctx->avp_message_authenticator =  cp;
 	cp = rad_avp_append_zero(RAD_AVP_MESSAGE_AUTHENTICATOR, 16, cp);
       } else {
 	cp = rad_avp_append_hex_16(ctx->out_file, RAD_AVP_MESSAGE_AUTHENTICATOR, value, cp);

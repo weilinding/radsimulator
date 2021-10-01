@@ -53,6 +53,10 @@
 #define RAD_EAP_SIM_KC_SIZE    8
 #define RAD_EAP_SIM_RAND_SIZE 16
 
+#define VENDORPEC_MICROSOFT		311
+#define PW_MSCHAP_CHALLENGE		11
+#define PW_MSCHAP_RESPONSE		1
+
 #pragma pack(push)
 #pragma pack(1)
 typedef struct rad_header_t_

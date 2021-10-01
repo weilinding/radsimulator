@@ -22,8 +22,8 @@ rad_output_hex(rad_script_context_t * ctx, char * hex, unsigned int len)
 #if 0
     if ((i % 20) == 19) {
       radcl_printf(ctx, "\n");
-    } else 
-#endif 
+    } else
+#endif
     if ((i % 4) == 3 && i != len - 1) {
       radcl_printf(ctx, "-");
     }
@@ -39,9 +39,9 @@ rad_eap_decode_at_version_list(rad_script_context_t * ctx, rad_eap_at_version_li
 
   n = ntohs(at_version_list->actual_length);
   if (n > attr_length || n < 2 || (n % 2) != 0) {
-    radcl_printf(ctx, 
-	    "Error: invalid at_version_list->actual_length=%u but attr_length=%u\n", 
-	    n, 
+    radcl_printf(ctx,
+	    "Error: invalid at_version_list->actual_length=%u but attr_length=%u\n",
+	    n,
 	    attr_length);
     radcl_exit(ctx, 1);
   }
@@ -98,7 +98,7 @@ rad_eap_sim_calculate_master_keys(rad_script_context_t * ctx)
   int n;
   int k;
   unsigned short selected_version;
-  
+
   for (n = 0; n < sizeof(ctx->eap_sim.master_key); n++) {
     if (ctx->eap_sim.master_key[n]) {
       break;
@@ -112,7 +112,7 @@ rad_eap_sim_calculate_master_keys(rad_script_context_t * ctx)
   radcl_printf(ctx, "# Info: Computing master key ...\n");
   n = ctx->eap_identity_length;
   memcpy(content, ctx->eap_identity, n);
-  
+
   radcl_printf(ctx, "# Info:   Identity=");
   rad_output_hex(ctx, ctx->eap_identity, n);
   radcl_printf(ctx, "\n");
@@ -153,12 +153,12 @@ rad_eap_sim_calculate_master_keys(rad_script_context_t * ctx)
   memcpy(&content[n], ctx->eap_sim.nonce, sizeof(ctx->eap_sim.nonce));
   n += sizeof(ctx->eap_sim.nonce);
 
-  memcpy(&content[n], 
-	 ctx->eap_sim.version_list, 
+  memcpy(&content[n],
+	 ctx->eap_sim.version_list,
 	 ctx->eap_sim.version_list_num * sizeof(ctx->eap_sim.version_list[0]));
 
   radcl_printf(ctx, "# Info:   version_list=");
-  rad_output_hex(ctx, (char *) ctx->eap_sim.version_list, 	 
+  rad_output_hex(ctx, (char *) ctx->eap_sim.version_list,
 		 ctx->eap_sim.version_list_num * sizeof(ctx->eap_sim.version_list[0]));
   radcl_printf(ctx, "\n");
 
@@ -206,12 +206,12 @@ rad_eap_decode_at_mac(rad_script_context_t * ctx, char * cp)
   c_len = ntohs(ctx->eap_header->length);
   memcpy(at_mac, &cp[4], sizeof(at_mac));
   memset(&cp[4], 0, sizeof(at_mac));
-  rad_calculate_hmac_sha1_128((unsigned char *) ctx->eap_header, 
+  rad_calculate_hmac_sha1_128((unsigned char *) ctx->eap_header,
 			      c_len,
 			      (unsigned char *) ctx->eap_sim.nonce,
 			      sizeof(ctx->eap_sim.nonce),
-			      ctx->eap_sim.K_aut, 
-			      sizeof(ctx->eap_sim.K_aut), 
+			      ctx->eap_sim.K_aut,
+			      sizeof(ctx->eap_sim.K_aut),
 			      calc_mac);
   if (memcmp(at_mac, calc_mac, sizeof(at_mac)) != 0) {
     radcl_printf(ctx, "Error: RX invalid AT_MAC=");
@@ -310,7 +310,7 @@ rad_eap_decode(rad_script_context_t * ctx, rad_eap_header_t * eap_header, unsign
   char * cp;
 
   if (ntohs(eap_header->length) != eap_length) {
-    radcl_printf(ctx, "Error: invalid eap length. eap_header->length=%u avp:eap_message->length=%u\n", 
+    radcl_printf(ctx, "Error: invalid eap length. eap_header->length=%u avp:eap_message->length=%u\n",
 	    ntohs(eap_header->length), eap_length);
     radcl_exit(ctx, 1);
   }
@@ -345,6 +345,7 @@ rad_eap_decode(rad_script_context_t * ctx, rad_eap_header_t * eap_header, unsign
                   radcl_printf(ctx, "Error: unsupported eap type MD5-Challenge (%u)\n", eap_header->type);
                   radcl_exit(ctx, 1);
                 }
+                break;
 
             default:
               radcl_printf(ctx, "Error: unsupported eap type (%u)\n", eap_header->type);

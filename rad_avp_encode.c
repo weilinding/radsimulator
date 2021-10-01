@@ -12,7 +12,7 @@
 #include "rad_script.h"
 #include "rad_crypto.h"
 
-char * 
+char *
 rad_avp_append_string(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   cp[0] = t;
@@ -22,7 +22,7 @@ rad_avp_append_string(FILE * out_file, unsigned t, const char * value, char * cp
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_zero(unsigned t, int len, char * cp)
 {
   cp[0] = t;
@@ -32,7 +32,7 @@ rad_avp_append_zero(unsigned t, int len, char * cp)
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_hex_16(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   int i, v, d1;
@@ -74,7 +74,7 @@ rad_avp_append_hex_16(FILE * out_file, unsigned t, const char * value, char * cp
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_u16(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   unsigned short v;
@@ -88,7 +88,7 @@ rad_avp_append_u16(FILE * out_file, unsigned t, const char * value, char * cp)
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_u32(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   unsigned long v;
@@ -104,7 +104,7 @@ rad_avp_append_u32(FILE * out_file, unsigned t, const char * value, char * cp)
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_ip(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   struct in_addr ip;
@@ -124,7 +124,7 @@ rad_avp_append_ip(FILE * out_file, unsigned t, const char * value, char * cp)
   return cp;
 }
 
-char * 
+char *
 rad_avp_append_nas_port_type(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   int v;
@@ -146,7 +146,7 @@ rad_avp_append_nas_port_type(FILE * out_file, unsigned t, const char * value, ch
   return cp;
 }
 
-void 
+void
 rad_avp_update_message_authenticator(char * avp_message_authenticator, const rad_header_t * rad_header, size_t tx_pkt_len, const char * password)
 {
   char md_value[16];
@@ -159,8 +159,57 @@ rad_avp_update_message_authenticator(char * avp_message_authenticator, const rad
   memcpy(&avp_message_authenticator[2], md_value, sizeof(md_value));
 }
 
-void
+char *
 rad_avp_append_chap_password(FILE * out_file, unsigned t, const char * value, char * cp)
+{
+
+  uint8_t *p;
+  size_t len, len2;
+
+  len = len2 = strlen(value);
+  if (len2 < 17) len2 = 17;
+  //p==output
+  memcpy(p, value, len);
+
+  cp[0] = t;
+  //len need to be calculated again
+  // value === password
+  //
+  cp[1] = 17 + 2;  //need to recalculate
+
+
+  int             i;
+  uint8_t         *ptr;
+  uint8_t         string[MAX_STRING_LEN * 2 + 1];
+  int id;
+   id =  rand() & 0xff;
+   i = 0;
+
+   ptr = string;
+   *ptr++ = id;
+   *cp = id ; //set chap ID
+
+   i++;
+   //memcpy(ptr, password->vp_strvalue, password->length);
+   memcpy(ptr, value, strlen(value));
+   ptr += strlen(value);
+   i += strlen(value);
+
+   /*
+    *      Request Authenticator .
+    */
+    //memcpy(ptr, packet->vector, AUTH_VECTOR_LEN); //msg authenticator
+    i += AUTH_VECTOR_LEN;
+
+   rad_calculate_md5(cp+1, i, string);
+
+   cp += cp[1];
+   return cp;
+
+}
+
+char *
+rad_avp_append_mschap_password(FILE * out_file, unsigned t, const char * value, char * cp)
 {
   cp[0] = t;
   cp[1] = strlen(value) + 2;
@@ -178,4 +227,3 @@ rad_avp_append_pap_password(FILE * out_file, unsigned t, const char * value, cha
   cp += cp[1];
   return cp;
 }
-

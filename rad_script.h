@@ -5,6 +5,8 @@
 #define RAD_MAX_AT_RAND_NUM      5
 #define RAD_MAX_TUPLE_NUM        10
 #define RAD_DEFAULT_TX_RETRY_INTERVAL_USEC 1500000
+#define MAX_STRING_LEN		254
+#define AUTH_VECTOR_LEN		16
 
 typedef struct rad_eap_sim_tuple_t_
 {
@@ -23,8 +25,8 @@ typedef struct rad_script_context_t_
   FILE * out_file;
   char input_prompt[32];
   char output_prompt[32];
-  long remote_ip; 
-  short remote_udp_port; 
+  long remote_ip;
+  short remote_udp_port;
   long local_ip;
   short local_udp_port;
   unsigned char packet_identifier;
@@ -66,17 +68,20 @@ typedef struct rad_script_context_t_
 } rad_script_context_t;
 
 void
-rad_script_init_context(rad_script_context_t * ctx, 
-			FILE * in_file, 
-			FILE * out_file, 
-			long remote_ip, 
-			short remote_udp_port, 
-			long local_ip, 
+rad_script_init_context(rad_script_context_t * ctx,
+			FILE * in_file,
+			FILE * out_file,
+			long remote_ip,
+			short remote_udp_port,
+			long local_ip,
 			short local_udp_port);
 
 void rad_run_script(rad_script_context_t * ctx);
 
 char * rad_avp_append_string(FILE * out_file, unsigned t, const char * value, char * cp);
+char * rad_avp_append_pap_password(FILE * out_file, unsigned t, const char * value, char * cp);
+char * rad_avp_append_chap_password(FILE * out_file, unsigned t, const char * value, char * cp);
+
 
 char * rad_avp_append_zero(unsigned t, int len, char * cp);
 char * rad_avp_append_hex_16(FILE * out_file, unsigned t, const char * value, char * cp);

@@ -19,7 +19,7 @@
 #define RADCL_TITLE "Radius Client Simulator Version 0.4"
 #define Debug   1
 
-typedef struct radcl_thread_t_ 
+typedef struct radcl_thread_t_
 {
   pthread_t pthread;
   rad_script_context_t ctx;
@@ -28,9 +28,9 @@ typedef struct radcl_thread_t_
   char * input_begin;
   char * input_end;
   char * output_end;
-  char user_name[128];
-  char user_password[128];
-  char auth_type[16];
+  char user_name[64];
+  char user_password[32];
+  char auth_type[32];
   char nas_identifier[128];
   char called_station_id[128];
   char calling_station_id[128];
@@ -49,8 +49,8 @@ typedef struct radcl_thread_list_t_
 radcl_thread_list_t thread_list;
 
 const char * radius_password = "testing123";
-char called_station_prefix[] = {0xac, 0x67, 0x06, 0x00, 0x00, 0x00}; 
-char calling_station_prefix[] = {0x00, 0x21, 0x19, 0x00, 0x00, 0x00}; 
+char called_station_prefix[] = {0xac, 0x67, 0x06, 0x00, 0x00, 0x00};
+char calling_station_prefix[] = {0x00, 0x21, 0x19, 0x00, 0x00, 0x00};
 const char * ssid_prefix = "SSID";
 
 
@@ -108,7 +108,7 @@ void
 radcl_printf(rad_script_context_t * ctx, const char *fmt, ...)
 {
   va_list ap;
-  
+
   va_start(ap, fmt);
 
   if (ctx->thread) {
@@ -162,7 +162,7 @@ radcl_gets(rad_script_context_t * ctx, char * line, int size)
   }
 }
 
-void 
+void
 radcl_exit(rad_script_context_t * ctx, int code)
 {
   if (ctx->thread) {
@@ -199,7 +199,7 @@ radcl_client_main(void * arg)
   return 0;
 }
 
-void 
+void
 radcl_client_init(radcl_thread_t * thread, int ue_id, long server_ip, short server_udp_port, long local_ip, short local_udp_port)
 {
   memset(thread, sizeof(*thread), 0);
@@ -240,7 +240,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
 	smac[0],smac[1],smac[2],smac[3],smac[4],smac[5]);
 
  #if Debug
-    fprintf(stdout,"Calling %s \n\r Called %s\r\n", thread->calling_station_id, thread->nas_identifier);
+  fprintf(stdout,"Calling %s \n\rCalled %s\r\nAuth Type %s\r\n", thread->calling_station_id, thread->nas_identifier,thread->auth_type);
  #endif
 
   if (ssid_id < 0) {
@@ -254,6 +254,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
 
   thread->input_end += sprintf(thread->input_end, "Open\n");
   if (strcmp(thread->auth_type, "EAPMD5") == 0) {
+      fprintf(stdout,"Entering %s\n", thread->auth_type);
       thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
       thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
       thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
@@ -303,6 +304,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
       thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
       thread->input_end += sprintf(thread->input_end, "TX-End\n");
    } else if(strcmp(thread->auth_type, "PAP") == 0) {
+      fprintf(stdout,"Entering %s\n", thread->auth_type);
       thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
       thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
       thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
@@ -319,6 +321,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
       thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
       thread->input_end += sprintf(thread->input_end, "TX-End\n");
    } else if(strcmp(thread->auth_type, "CHAP") == 0) {
+      fprintf(stdout,"Entering %s\n", thread->auth_type);
       thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
       thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
       thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
@@ -335,6 +338,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
       thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
       thread->input_end += sprintf(thread->input_end, "TX-End\n");
   } else if(strcmp(thread->auth_type, "EAPSIM") == 0) {
+      fprintf(stdout,"Entering %s\n", thread->auth_type);
       thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
       thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
       thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
@@ -457,7 +461,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       l_ip = local_ip;
       l_port = local_udp_port;
     } else {
-      l_ip = n%num_ap + local_ip; 
+      l_ip = n%num_ap + local_ip;
       if (local_udp_port == 0) {
 	l_port = 10000 + (n / num_ap);
       } else {
@@ -480,10 +484,10 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
 
     for (cp = line; *cp != 0; cp++) {
       if (!isspace(*cp)) {
-	break;
+	         break;
       }
     }
-    
+
     if (status == 0) {
       if (*cp == 0) {
 	continue;
@@ -495,15 +499,25 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       }
             thread->user_name[k] = 0;
 
+      while (isspace(*cp)) {
+        cp++;
+      }
+
       for (k = 0; !isspace(*cp); k++, cp++) {
 	        thread->user_password[k] = *cp;
       }
-            thread->user_password[k] = 0;
+          thread->user_password[k] = 0;
+
+      while (isspace(*cp)) {
+              cp++;
+      }
 
       for (k = 0; !isspace(*cp); k++, cp++) {
 	        thread->auth_type[k] = *cp;
       }
-            thread->auth_type[k] = 0;
+          thread->auth_type[k] = 0;
+
+      fprintf(stdout, " Read <%s> \n", thread->auth_type);
 
             status = 1;
 
@@ -541,7 +555,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
         exit(1);
       } else {
         #if Debug
-        fprintf(stdout, " line <%s> in file %s\n", line, user_conf_filename);
+        //fprintf(stdout, " line <%s> in file %s\n", line, user_conf_filename);
         #endif
      }
 
@@ -558,6 +572,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       fprintf(stdout, "(%d) %s <%s>=<%s>\n", n, thread->user_name, field, value);
 
       if (strcmp(thread->auth_type, "EAPSIM") == 0) {
+          fprintf(stdout,"Entering triplets %s\n", thread->auth_type);
           if (strcmp(field, "EAP-Sim-Rand1") == 0) {
         thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND1=%s\n", value + 2);
           } else if (strcmp(field, "EAP-Sim-Rand2") == 0) {
@@ -599,10 +614,13 @@ radcl_run_clients(int num_ue, int num_concurrent)
   num_started = 0;
   num_completed = 0;
   num_running = 0;
+
   while (num_completed < num_ue) {
     while (num_running < num_concurrent && num_started < num_ue) {
       thread = &thread_list.thread[num_started];
+      //Bug not creating ??
       result = pthread_create(&thread->pthread, NULL, radcl_client_main, thread);
+
       if (result != 0) {
 	if (result == EAGAIN) {
 	  struct rlimit limit;
@@ -626,7 +644,7 @@ radcl_run_clients(int num_ue, int num_concurrent)
       thread = &thread_list.thread[n];
       if (!thread->done) {
 	result = pthread_tryjoin_np(thread->pthread, NULL);
-	result = 0; 
+	result = 0;
 	if (result != 0) {
 	  if (result != EBUSY) {
 	    fprintf(stderr, "Error: cannot join thread #%d\n", n);
@@ -696,6 +714,10 @@ radcl_analyze_results(int num_ue, int show_auth_summary)
       max_time = duration;
     }
 
+    #if Debug
+          fprintf(stdout, "(%u) ==> {\n%s}\n", thread->ue_id, thread->output);
+    #endif
+
     if (strncmp(thread->result_text, "Result: Access-Accept", strlen("Result: Access-Accept")) == 0) {
       num_access_accept ++;
     } else if (strncmp(thread->result_text, "Result: Access-Reject", strlen("Result: Access-Reject")) == 0) {
@@ -704,34 +726,30 @@ radcl_analyze_results(int num_ue, int show_auth_summary)
       num_error ++;
     } else {
       num_access_other ++;
-
-    #if Debug
-          fprintf(stdout, "(%u) ==> {\n%s}\n", thread->ue_id, thread->output);
-    #endif
     }
 
     if (show_auth_summary) {
-      fprintf(stdout, "(%u) %s > %s (%u.%06u sec)\n", 
-	      thread->ue_id, 
-	      thread->user_name, 
-	      thread->result_text, 
-	      (uint32_t) result.tv_sec, 
-	      (uint32_t) result.tv_usec); 
+      fprintf(stdout, "(%u) %s > %s (%u.%06u sec)\n",
+	      thread->ue_id,
+	      thread->user_name,
+	      thread->result_text,
+	      (uint32_t) result.tv_sec,
+	      (uint32_t) result.tv_usec);
     }
   }
 
   timersub(&end, &start, &result);
   total_sec = (result.tv_sec * 1E6 + result.tv_usec) / 1E6;
   speed = num_ue / total_sec;
-  fprintf(stdout, "%u auths (%u accepts, %u rejects, %u errors, %u others), speed=%.2f auth/sec, total %.2f sec, range=(%.6f, %.6f)\n", 
+  fprintf(stdout, "%u auths (%u accepts, %u rejects, %u errors, %u others), speed=%.2f auth/sec, total %.2f sec, range=(%.6f, %.6f)\n",
 	  num_ue,
 	  num_access_accept,
 	  num_access_reject,
 	  num_error,
 	  num_access_other,
-	  speed, 
-	  total_sec, 
-	  min_time, 
+	  speed,
+	  total_sec,
+	  min_time,
 	  max_time);
 }
 
@@ -782,7 +800,7 @@ main(int argc, const char * argv[])
   int num_ap;
   int num_ssid;
   int num_concurrent;
-  int show_auth_summary;
+  int show_auth_summary = 1;
 
   fprintf(stdout, "%s\n", RADCL_TITLE);
 
@@ -805,7 +823,7 @@ main(int argc, const char * argv[])
 	    "\t--server-udp <udp-port>\t\t\t[default:%d]\n"
 	    "\t--my-ip <ddd.ddd.ddd.ddd>\t\t\t\t[required if --ap is greater than 1]\n"
 	    "\t--my-udp <my-udp-port>\t\t\t[optional]\n"
-	    "\t--output <filename>\t\t\t[not supported]\n" 
+	    "\t--output <filename>\t\t\t[not supported]\n"
 	    "\t--ue <num>\t\t\t\t[# of UEs, optional, default:%d]\n"
 	    "\t--user-conf <conf>\t\t\t[triplets file]\n"
 	    "\t--ap <num>\t\t\t\t[# of APs or radius clients, default:%d]\n"
@@ -815,7 +833,7 @@ main(int argc, const char * argv[])
 	    "\t--no-auth-summary\t\t\t[default display auth summary, optional]\n"
 	    "\t--ssid-prefix <ssid>\t\t\t[ssid-prefix, default:%s]\n"
 	    "\t--calling-sta-prefix <00:21:19:00:00:00>\t\n"
-	    "\t--called-sta-prefix <AC:67:06:00:00:00>\t\n", 
+	    "\t--called-sta-prefix <AC:67:06:00:00:00>\t\n",
 	    argv[0],
 	    server_udp_port,
 	    num_ue,
@@ -851,7 +869,7 @@ main(int argc, const char * argv[])
       struct in_addr my_in_addr;
       while((c = getopt_long_only(argc, (char * const *) argv, "ve:", long_options, &option_index)) != EOF) {
     switch (c) {
-    case 0 : 
+    case 0 :
       local_udp_port = atoi(optarg);
       break;
     case  1 :
@@ -889,18 +907,18 @@ main(int argc, const char * argv[])
     case   10:
       radius_password = optarg;
       break;
-    case  11: 
+    case  11:
       show_auth_summary = 0;
-    case  12: 
+    case  12:
       ssid_prefix = optarg;
       break;
     case 13:
-      bcopy(atoether(optarg), (void *) calling_station_prefix, 6); 
+      bcopy(atoether(optarg), (void *) calling_station_prefix, 6);
       break;
-    case 14: 
+    case 14:
       bcopy(atoether(optarg), (void *) called_station_prefix, 6);
       break;
-    case  15: 
+    case  15:
       user_conf_filename = optarg;
       break;
   }
