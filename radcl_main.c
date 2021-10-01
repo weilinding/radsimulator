@@ -16,8 +16,8 @@
 #include <getopt.h>
 #include "radcl.h"
 
-#define RADCL_TITLE "Radius Client Simulator Version 0.4"
-#define Debug   1
+#define RADCL_TITLE "Radius Client Simulator Version 1.0"
+#define Debug  0 
 
 typedef struct radcl_thread_t_
 {
@@ -238,11 +238,9 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
   bcopy(&smac_temp, smac + 2 , 4);
   sprintf(thread->calling_station_id, "%02X-%02X-%02X-%02X-%02X-%02X",
 	smac[0],smac[1],smac[2],smac[3],smac[4],smac[5]);
-
- #if Debug
-  fprintf(stdout,"Calling %s \n\rCalled %s\r\nAuth Type %s\r\n", thread->calling_station_id, thread->nas_identifier,thread->auth_type);
- #endif
-
+  #if Debug
+  fprintf(stdout,"Calling %s \n\r Called %s\r\n", thread->calling_station_id, thread->nas_identifier);
+  #endif
   if (ssid_id < 0) {
     strcpy(thread->called_station_id, thread->nas_identifier);
   } else if (ssid_id == 0) {
@@ -251,175 +249,171 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
     sprintf(thread->called_station_id, "%s:%s%u", thread->nas_identifier, ssid_prefix, ssid_id);
   }
 
-
   thread->input_end += sprintf(thread->input_end, "Open\n");
   if (strcmp(thread->auth_type, "EAPMD5") == 0) {
-      fprintf(stdout,"Entering %s\n", thread->auth_type);
-      thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = 0\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = Identity\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Identity = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
+    fprintf(stdout,"Entering %s\n", thread->auth_type);
+    thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
+    thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+    thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+    thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = 0\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = Identity\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Identity = %s\n", thread->user_name);
+    thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "TX-End\n");
 
-      thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "RX-End\n");
+    thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
+    thread->input_end += sprintf(thread->input_end, "RX-End\n");
 
-      thread->input_end += sprintf(thread->input_end,"TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-MD5\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Start\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_SELECTED_VERSION = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_NONCE_MT = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_IDENTITY = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
-   } else if(strcmp(thread->auth_type, "PAP") == 0) {
-      fprintf(stdout,"Entering %s\n", thread->auth_type);
-      thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Password = %s\n", thread->user_password);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
-   } else if(strcmp(thread->auth_type, "CHAP") == 0) {
-      fprintf(stdout,"Entering %s\n", thread->auth_type);
-      thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:CHAP-Password = %s\n", thread->user_password);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
+    thread->input_end += sprintf(thread->input_end,"TX-Begin\n");
+    thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+    thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+    thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-MD5\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Start\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_SELECTED_VERSION = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_NONCE_MT = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_IDENTITY = %s\n", thread->user_name);
+    thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
+    thread->input_end += sprintf(thread->input_end, "TX-End\n");
+  } else if(strcmp(thread->auth_type, "PAP") == 0) {
+     thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
+     thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+     thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:User-Password = %s\n", thread->user_password);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+     thread->input_end += sprintf(thread->input_end, "TX-End\n");
+  } else if(strcmp(thread->auth_type, "CHAP") == 0) {
+     thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
+     thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+     thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:CHAP-Password = %s\n", thread->user_password);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+     thread->input_end += sprintf(thread->input_end, "TX-End\n");
   } else if(strcmp(thread->auth_type, "EAPSIM") == 0) {
-      fprintf(stdout,"Entering %s\n", thread->auth_type);
-      thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = 0\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = Identity\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Identity = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
-
-      thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "RX-End\n");
-
-      thread->input_end += sprintf(thread->input_end,"TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-SIM\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Start\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_SELECTED_VERSION = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_NONCE_MT = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_IDENTITY = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
-
-      thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "RX-End\n");
-
-      thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
-      thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-SIM\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Challenge\n");
-      thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_MAC = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
-      thread->input_end += sprintf(thread->input_end, "TX-End\n");
-  }
+  thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+  thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+  thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = 0\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = Identity\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Identity = %s\n", thread->user_name);
+  thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "TX-End\n");
 
   thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
   thread->input_end += sprintf(thread->input_end, "RX-End\n");
-  thread->input_end += sprintf(thread->input_end, "Close\n");
 
-  // printf("{\n%s}\n", thread->input);
+  thread->input_end += sprintf(thread->input_end,"TX-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+  thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+  thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-SIM\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Start\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_SELECTED_VERSION = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_NONCE_MT = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_IDENTITY = %s\n", thread->user_name);
+  thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "TX-End\n");
+
+  thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "RX-End\n");
+
+  thread->input_end += sprintf(thread->input_end, "TX-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\tCode = Access-Request\n");
+  thread->input_end += sprintf(thread->input_end, "\tPacket-Identifier = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:User-Name = %s\n", thread->user_name);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-IP-Address = %s\n", inet_ntoa(*((struct in_addr*) &local_ip)));
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Identifier = %s\n", thread->nas_identifier);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port = 3\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
+  thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Id = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Type = EAP-SIM\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:Subtype = Challenge\n");
+  thread->input_end += sprintf(thread->input_end, "\t\tEAP:AT_MAC = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tEAP-End\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "\tAVP:State = Auto\n");
+  thread->input_end += sprintf(thread->input_end, "TX-End\n");
+  }
+  thread->input_end += sprintf(thread->input_end, "RX-Begin\n");
+  thread->input_end += sprintf(thread->input_end, "RX-End\n");
+  thread->input_end += sprintf(thread->input_end, "Close\n");
+  #if Debug
+  printf("#### {\n%s}\n", thread->input);
+  #endif
 }
 
 int
@@ -484,7 +478,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
 
     for (cp = line; *cp != 0; cp++) {
       if (!isspace(*cp)) {
-	         break;
+	break;
       }
     }
 
@@ -495,9 +489,9 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
 
       thread = &thread_list.thread[n];
       for (k = 0; !isspace(*cp); k++, cp++) {
-	        thread->user_name[k] = *cp;
+	thread->user_name[k] = *cp;
       }
-            thread->user_name[k] = 0;
+      thread->user_name[k] = 0;
 
       while (isspace(*cp)) {
         cp++;
@@ -517,10 +511,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       }
           thread->auth_type[k] = 0;
 
-      fprintf(stdout, " Read <%s> \n", thread->auth_type);
-
-            status = 1;
-
+      status = 1;
     } else {
       if (*cp == 0) {
 	int ssid_id;
@@ -534,7 +525,6 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
 	  ssid_id = (n % num_ssid) + 1;
 	}
 
-    //TODO, can passing auth method here
 	radcl_client_prepare(thread, (n % num_ap) + 1, ssid_id);
 	n ++;
 	continue;
@@ -549,49 +539,39 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
 	cp ++;
       }
 
-
       if (*cp != '=') {
-        fprintf(stderr, "Error: invalid line <%s> in file %s\n", line, user_conf_filename);
-        exit(1);
-      } else {
-        #if Debug
-        //fprintf(stdout, " line <%s> in file %s\n", line, user_conf_filename);
-        #endif
-     }
+	fprintf(stderr, "Error: invalid line <%s> in file %s\n", line, user_conf_filename);
+	exit(1);
+      }
 
       cp ++;
 
       while (isspace(*cp) && *cp != 0) {
-	        cp ++;
+	cp ++;
       }
 
       for (k = 0; !isspace(*cp) && *cp != ',' && *cp != 0; k++, cp++) {
-	        value[k] = *cp;
+	value[k] = *cp;
       }
 
-      fprintf(stdout, "(%d) %s <%s>=<%s>\n", n, thread->user_name, field, value);
-
-      if (strcmp(thread->auth_type, "EAPSIM") == 0) {
-          fprintf(stdout,"Entering triplets %s\n", thread->auth_type);
-          if (strcmp(field, "EAP-Sim-Rand1") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND1=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-Rand2") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND2=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-Rand3") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND3=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-SRES1") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES1=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-SRES2") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES2=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-SRES3") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES3=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-KC1") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC1=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-KC2") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC2=%s\n", value + 2);
-          } else if (strcmp(field, "EAP-Sim-KC3") == 0) {
-        thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC3=%s\n", value + 2);
-          }
+      if (strcmp(field, "EAP-Sim-Rand1") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND1=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-Rand2") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND2=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-Rand3") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND3=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-SRES1") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES1=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-SRES2") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES2=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-SRES3") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-SRES3=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-KC1") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC1=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-KC2") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC2=%s\n", value + 2);
+      } else if (strcmp(field, "EAP-Sim-KC3") == 0) {
+	thread->input_end += sprintf(thread->input_end, "EAP-SIM-KC3=%s\n", value + 2);
       }
     }
   }
@@ -614,13 +594,10 @@ radcl_run_clients(int num_ue, int num_concurrent)
   num_started = 0;
   num_completed = 0;
   num_running = 0;
-
   while (num_completed < num_ue) {
     while (num_running < num_concurrent && num_started < num_ue) {
       thread = &thread_list.thread[num_started];
-      //Bug not creating ??
       result = pthread_create(&thread->pthread, NULL, radcl_client_main, thread);
-
       if (result != 0) {
 	if (result == EAGAIN) {
 	  struct rlimit limit;
@@ -644,7 +621,6 @@ radcl_run_clients(int num_ue, int num_concurrent)
       thread = &thread_list.thread[n];
       if (!thread->done) {
 	result = pthread_tryjoin_np(thread->pthread, NULL);
-	result = 0;
 	if (result != 0) {
 	  if (result != EBUSY) {
 	    fprintf(stderr, "Error: cannot join thread #%d\n", n);
@@ -713,10 +689,6 @@ radcl_analyze_results(int num_ue, int show_auth_summary)
     if (max_time == 0 || max_time < duration) {
       max_time = duration;
     }
-
-    #if Debug
-          fprintf(stdout, "(%u) ==> {\n%s}\n", thread->ue_id, thread->output);
-    #endif
 
     if (strncmp(thread->result_text, "Result: Access-Accept", strlen("Result: Access-Accept")) == 0) {
       num_access_accept ++;
@@ -800,7 +772,7 @@ main(int argc, const char * argv[])
   int num_ap;
   int num_ssid;
   int num_concurrent;
-  int show_auth_summary = 1;
+  int show_auth_summary;
 
   fprintf(stdout, "%s\n", RADCL_TITLE);
 

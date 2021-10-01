@@ -321,8 +321,6 @@ rad_run_script(rad_script_context_t * ctx)
       continue;
     }
 
-    //radcl_printf(ctx, "# COMMAND IS <%s>\n",field );
-
     if (strcmp(field, "Open") == 0) {
       rad_open_socket(ctx);
       memset((char *) &ctx->si_other, 0, sizeof(ctx->si_other));
@@ -337,13 +335,11 @@ rad_run_script(rad_script_context_t * ctx)
       ctx->avp_eap_header = 0;
       cp = &ctx->tx_buf[sizeof(rad_header_t)];
       rad_update_random(ctx->rad_header->authenticator, 16);
-      radcl_printf(ctx, "# AUTHENTICATOSR IS <%s>\n",ctx->rad_header->authenticator );
     } else if (strcmp(field, "TX-End") == 0) {
       ctx->tx_buf_len = cp - ctx->tx_buf;
       ctx->rad_header->packet_identifier = ctx->packet_identifier;
       ctx->rad_header->length = htons(ctx->tx_buf_len);
       //rad_update_random(ctx->rad_header->authenticator, 16);
-      radcl_printf(ctx, "# AUTHENTICATOSR IS <%s>\n",ctx->rad_header->authenticator );
       rad_avp_update_message_authenticator(ctx->avp_message_authenticator, ctx->rad_header, ctx->tx_buf_len, ctx->password);
       rad_tx_packet(ctx);
     } else if (strcmp(field, "Close") == 0) {

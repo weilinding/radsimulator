@@ -70,7 +70,7 @@ rad_avp_decode(rad_script_context_t * ctx)
     if ((cp = ctx->rx_avp[RAD_AVP_EAP_MESSAGE]) != 0) {
       rad_eap_decode(ctx, (rad_eap_header_t *) &cp[2], (unsigned short) cp[1] - 2); 
     } else {
-      radcl_printf(ctx, "Result: Access-Accept, but missing EAP message in Access-Accept\n");
+      radcl_printf(ctx, "Result: Access-Accept: NO EAP message\n");
       radcl_exit(ctx, 1);
     }
 
@@ -80,7 +80,7 @@ rad_avp_decode(rad_script_context_t * ctx)
     if ((cp = ctx->rx_avp[RAD_AVP_EAP_MESSAGE]) != 0) {
       rad_eap_decode(ctx, (rad_eap_header_t *) &cp[2], (unsigned short) cp[1] - 2); 
     } else {
-      radcl_printf(ctx, "Result: Access-Reject (without EAP message in Access-Reject)\n");
+      radcl_printf(ctx, "Result: Access-Reject (NO EAP message)\n");
       radcl_exit(ctx, 1);
     }
     break;
