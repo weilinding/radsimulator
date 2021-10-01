@@ -79,8 +79,9 @@ rad_script_init_context(rad_script_context_t * ctx,
 void rad_run_script(rad_script_context_t * ctx);
 
 char * rad_avp_append_string(FILE * out_file, unsigned t, const char * value, char * cp);
-char * rad_avp_append_pap_password(FILE * out_file, unsigned t, const char * value, char * cp);
-char * rad_avp_append_chap_password(FILE * out_file, unsigned t, const char * value, char * cp);
+char * rad_avp_append_pap_password(rad_script_context_t * out_file, unsigned t, const char * value, char * cp);
+char * rad_avp_append_chap_password(rad_script_context_t * out_file, unsigned t, const char * value, char * cp);
+char * rad_avp_append_mschap_password(rad_script_context_t * out_file, unsigned t, const char * value, char * cp);
 
 
 char * rad_avp_append_zero(unsigned t, int len, char * cp);

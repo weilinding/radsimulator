@@ -162,7 +162,7 @@ rad_avp_update_message_authenticator(char * avp_message_authenticator, const rad
 char *
 rad_avp_append_chap_password(rad_script_context_t * ctx, unsigned t, const char * value, char * cp)
 {
-  size_t len, len2;
+  size_t len;
   int             i;
   uint8_t         *ptr;
   uint8_t         string[MAX_STRING_LEN * 2 + 1];
@@ -202,7 +202,7 @@ rad_avp_append_chap_password(rad_script_context_t * ctx, unsigned t, const char 
 }
 
 char *
-rad_avp_append_mschap_password(FILE * out_file, unsigned t, const char * value, char * cp)
+rad_avp_append_mschap_password(rad_script_context_t * out_file, unsigned t, const char * value, char * cp)
 {
   cp[0] = t;
   cp[1] = strlen(value) + 2;
@@ -212,11 +212,51 @@ rad_avp_append_mschap_password(FILE * out_file, unsigned t, const char * value, 
 }
 
 char *
-rad_avp_append_pap_password(FILE * out_file, unsigned t, const char * value, char * cp)
+rad_avp_append_pap_password(rad_script_context_t * ctx, unsigned t, const char * value, char * cp)
 {
-  cp[0] = t;
-  cp[1] = strlen(value) + 2;
-  strcpy(&cp[2], value);
-  cp += cp[1];
-  return cp;
+  size_t len;
+  int             i;
+  uint8_t         *ptr;
+  uint8_t         string[MAX_STRING_LEN * 2 + 1];
+  uint8_t         hash[16];
+  i = 0;
+// In packets that have the user password, the Authentication field contains a 16 octet random number called the Request Authenticator.
+// The Request Authenticator and the client's shared secret are put into an MD5 hash. The result is a 16 octet hash.
+// The user-provided password is padded to 16 octets with nulls.
+// The hash from step 2 is XORed (Exclusive-OR) with the padded password. This is the data sent in the packet as the user_password attribute.
+// The RADIUS server calculates the same hash as that in Step 2.
+// This hash is XORed with the packet data from Step 4, thus recovering the password.
+
+   cp[0] = t;
+   cp[1] = 16 + 2;  //always len 18 for pap type(1)len(1)hash(16)
+
+   ptr = string;
+
+   //share secret
+   len = strlen(ctx->password);
+   memcpy(ptr, ctx->password, len);
+   ptr += len;
+   i += len;
+
+   /*
+    *      Request Authenticator .
+    */
+    memcpy(ptr, ctx->rad_header->authenticator, AUTH_VECTOR_LEN); //msg authenticator
+    i += AUTH_VECTOR_LEN;
+    ptr += AUTH_VECTOR_LEN;
+
+   rad_calculate_md5(string, i, hash);
+
+   //XOR with password value
+   len = strlen(value);
+   for (i=0; i<16; i++)
+   {
+     if (i < len)
+      cp[i+2] = value[i] ^ hash[i];
+     else
+      cp[i+2] = 0x00 ^ hash[i] ;
+   }
+
+   cp += cp[1];
+   return cp;
 }

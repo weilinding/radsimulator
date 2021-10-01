@@ -12,7 +12,7 @@
 
 #define RAD_AVP_USER_NAME              1
 #define RAD_AVP_USER_PASSWORD          2
-#define RAD_AVP_CHAP_PASSWORD          2
+#define RAD_AVP_CHAP_PASSWORD          3
 #define RAD_AVP_NAS_IP_ADDRESS         4
 #define RAD_AVP_NAS_PORT               5
 #define RAD_AVP_FRAMED_MTU            12

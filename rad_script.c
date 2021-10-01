@@ -321,7 +321,7 @@ rad_run_script(rad_script_context_t * ctx)
       continue;
     }
 
-    radcl_printf(ctx, "# COMMAND IS <%s>\n",field );
+    //radcl_printf(ctx, "# COMMAND IS <%s>\n",field );
 
     if (strcmp(field, "Open") == 0) {
       rad_open_socket(ctx);
@@ -336,11 +336,14 @@ rad_run_script(rad_script_context_t * ctx)
       ctx->avp_message_authenticator = 0;
       ctx->avp_eap_header = 0;
       cp = &ctx->tx_buf[sizeof(rad_header_t)];
+      rad_update_random(ctx->rad_header->authenticator, 16);
+      radcl_printf(ctx, "# AUTHENTICATOSR IS <%s>\n",ctx->rad_header->authenticator );
     } else if (strcmp(field, "TX-End") == 0) {
       ctx->tx_buf_len = cp - ctx->tx_buf;
       ctx->rad_header->packet_identifier = ctx->packet_identifier;
       ctx->rad_header->length = htons(ctx->tx_buf_len);
-      rad_update_random(ctx->rad_header->authenticator, 16);
+      //rad_update_random(ctx->rad_header->authenticator, 16);
+      radcl_printf(ctx, "# AUTHENTICATOSR IS <%s>\n",ctx->rad_header->authenticator );
       rad_avp_update_message_authenticator(ctx->avp_message_authenticator, ctx->rad_header, ctx->tx_buf_len, ctx->password);
       rad_tx_packet(ctx);
     } else if (strcmp(field, "Close") == 0) {
@@ -365,9 +368,9 @@ rad_run_script(rad_script_context_t * ctx)
     } else if (strcmp(field, "AVP:User-Name") == 0) {
       cp = rad_avp_append_string(ctx->out_file, RAD_AVP_USER_NAME, value, cp);
     } else if (strcmp(field, "AVP:User-Password") == 0) {
-      cp = rad_avp_append_pap_password(ctx->out_file, RAD_AVP_USER_PASSWORD, value, cp);
+      cp = rad_avp_append_pap_password(ctx, RAD_AVP_USER_PASSWORD, value, cp);
     } else if (strcmp(field, "AVP:CHAP-Password") == 0) {
-      cp = rad_avp_append_chap_password(ctx->out_file, RAD_AVP_CHAP_PASSWORD, value, cp);
+      cp = rad_avp_append_chap_password(ctx, RAD_AVP_CHAP_PASSWORD, value, cp);
     } else if (strcmp(field, "AVP:NAS-IP-Address") == 0) {
       cp = rad_avp_append_ip(ctx->out_file, RAD_AVP_NAS_IP_ADDRESS, value, cp);
     } else if (strcmp(field, "AVP:NAS-Identifier") == 0) {
@@ -385,12 +388,12 @@ rad_run_script(rad_script_context_t * ctx)
     } else if (strcmp(field, "AVP:Connect-Info") == 0) {
       cp = rad_avp_append_string(ctx->out_file, RAD_AVP_CONNECT_INFO, value, cp);
     } else if (strcmp(field, "AVP:Message-Authenticator") == 0) {
-      if (strcmp(value, "Auto") == 0) {
-	ctx->avp_message_authenticator =  cp;
-	cp = rad_avp_append_zero(RAD_AVP_MESSAGE_AUTHENTICATOR, 16, cp);
-      } else {
-	cp = rad_avp_append_hex_16(ctx->out_file, RAD_AVP_MESSAGE_AUTHENTICATOR, value, cp);
-      }
+        if (strcmp(value, "Auto") == 0) {
+  	       ctx->avp_message_authenticator =  cp;
+  	        cp = rad_avp_append_zero(RAD_AVP_MESSAGE_AUTHENTICATOR, 16, cp);
+        } else {
+  	       cp = rad_avp_append_hex_16(ctx->out_file, RAD_AVP_MESSAGE_AUTHENTICATOR, value, cp);
+        }
     } else if (strcmp(field, "EAP-Begin") == 0) {
       ctx->avp_eap_header = cp;
       cp[0] = RAD_AVP_EAP_MESSAGE;
@@ -405,29 +408,29 @@ rad_run_script(rad_script_context_t * ctx)
       rad_eap_update_at_mac(ctx);
     } else if (strcmp(field, "EAP:Code") == 0) {
       if (strcmp(value, "Request") == 0) {
-	ctx->eap_header->code = RAD_EAP_CODE_REQUEST;
+	         ctx->eap_header->code = RAD_EAP_CODE_REQUEST;
       } else if (strcmp(value, "Response") == 0) {
-	ctx->eap_header->code = RAD_EAP_CODE_RESPONSE;
+	         ctx->eap_header->code = RAD_EAP_CODE_RESPONSE;
       } else {
-	radcl_printf(ctx, "Error: unknown EAP:Code <%s>\n", value);
-	radcl_exit(ctx, 1);
+        	radcl_printf(ctx, "Error: unknown EAP:Code <%s>\n", value);
+        	radcl_exit(ctx, 1);
       }
     } else if (strcmp(field, "EAP:Id") == 0) {
-      if (strcmp(value, "Auto") == 0) {
-	ctx->eap_header->identifier = ctx->eap_identifier;
-      } else {
-	ctx->eap_header->identifier = atoi(value);
-      }
+        if (strcmp(value, "Auto") == 0) {
+  	       ctx->eap_header->identifier = ctx->eap_identifier;
+        } else {
+  	       ctx->eap_header->identifier = atoi(value);
+        }
     } else if (strcmp(field, "EAP:Type") == 0) {
       if (strcmp(value, "Identity") == 0) {
-	ctx->eap_header->type = RAD_EAP_TYPE_IDENTITY;
+	       ctx->eap_header->type = RAD_EAP_TYPE_IDENTITY;
       } else if (strcmp(value, "EAP-SIM") == 0) {
-	ctx->eap_header->type = RAD_EAP_TYPE_SIM;
-	} else if (strcmp(value, "EAP-MD5") == 0) {
-	ctx->eap_header->type = RAD_EAP_TYPE_MD5;
+	       ctx->eap_header->type = RAD_EAP_TYPE_SIM;
+	     } else if (strcmp(value, "EAP-MD5") == 0) {
+	        ctx->eap_header->type = RAD_EAP_TYPE_MD5;
       } else {
-	radcl_printf(ctx, "Error: unknown EAP:Type <%s>\n", value);
-	radcl_exit(ctx, 1);
+      	radcl_printf(ctx, "Error: unknown EAP:Type <%s>\n", value);
+      	radcl_exit(ctx, 1);
       }
     } else if (strcmp(field, "EAP:Subtype") == 0) {
       if (strcmp(value, "Start") == 0) {
