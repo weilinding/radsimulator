@@ -470,7 +470,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
   n = 0;
   while (n < num_ue && fgets(line, sizeof(line), user_conf_file) == line) {
     for (cp = line; *cp != 0; cp++) {
-      if (*cp == '\n' || *cp == '\r') {
+      if (*cp == '\n' || *cp == '\r' || *cp == '#') {
 	*cp = 0;
 	break;
       }
@@ -496,7 +496,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       while (isspace(*cp)) {
         cp++;
       }
-
+/*
       for (k = 0; !isspace(*cp); k++, cp++) {
 	        thread->user_password[k] = *cp;
       }
@@ -505,7 +505,7 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       while (isspace(*cp)) {
               cp++;
       }
-
+*/
       for (k = 0; !isspace(*cp); k++, cp++) {
 	        thread->auth_type[k] = *cp;
       }
@@ -549,12 +549,18 @@ radcl_setup_clients(long server_ip, short server_udp_port, long local_ip, short 
       while (isspace(*cp) && *cp != 0) {
 	cp ++;
       }
-
+      
       for (k = 0; !isspace(*cp) && *cp != ',' && *cp != 0; k++, cp++) {
 	value[k] = *cp;
       }
 
-      if (strcmp(field, "EAP-Sim-Rand1") == 0) {
+      if (value[k-1] == '"') {
+	      value[k-1] = 0;
+      }
+
+      if (strcmp(field, "Cleartext-Password") == 0) {
+	  memcpy(thread->user_password, value + 1, sizeof(value + 1));
+      } else if (strcmp(field, "EAP-Sim-Rand1") == 0) {
 	thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND1=%s\n", value + 2);
       } else if (strcmp(field, "EAP-Sim-Rand2") == 0) {
 	thread->input_end += sprintf(thread->input_end, "EAP-SIM-RAND2=%s\n", value + 2);
