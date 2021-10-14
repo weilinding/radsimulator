@@ -131,6 +131,8 @@ rad_avp_append_nas_port_type(FILE * out_file, unsigned t, const char * value, ch
 
   if (strcmp(value, "Wireless-802.11") == 0) {
     v = 19;
+  } else if (strcmp(value, "Ethernet") == 0) {
+    v = 15;
   } else {
     fprintf(out_file, "Error: unknown NAS-Port-Type <%s>\n", value);
     exit(1);

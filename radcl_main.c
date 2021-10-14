@@ -31,6 +31,7 @@ typedef struct radcl_thread_t_
   char user_name[64];
   char user_password[32];
   char auth_type[32];
+  char nas_port_type[32];
   char nas_identifier[128];
   char called_station_id[128];
   char calling_station_id[128];
@@ -52,6 +53,8 @@ const char * radius_password = "testing123";
 char called_station_prefix[] = {0xac, 0x67, 0x06, 0x00, 0x00, 0x00};
 char calling_station_prefix[] = {0x00, 0x21, 0x19, 0x00, 0x00, 0x00};
 const char * ssid_prefix = "SSID";
+const char * nas_port_type = "Wireless-802.11";
+const char * nas_port_type_ether = "Ethernet";
 
 
 static inline char *atoether( char *txt )
@@ -243,10 +246,13 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
   #endif
   if (ssid_id < 0) {
     strcpy(thread->called_station_id, thread->nas_identifier);
+    strcpy(thread->nas_port_type, nas_port_type_ether);
   } else if (ssid_id == 0) {
     sprintf(thread->called_station_id, "%s:%s", thread->nas_identifier, ssid_prefix);
+    strcpy(thread->nas_port_type, nas_port_type);
   } else {
     sprintf(thread->called_station_id, "%s:%s%u", thread->nas_identifier, ssid_prefix, ssid_id);
+    strcpy(thread->nas_port_type, nas_port_type);
   }
 
   thread->input_end += sprintf(thread->input_end, "Open\n");
@@ -262,7 +268,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
     thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = %s\n", thread->nas_port_type);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
     thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
     thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
@@ -286,7 +292,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
     thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+    thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = %s\n", thread->nas_port_type);
     thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
     thread->input_end += sprintf(thread->input_end, "\tEAP-Begin\n");
     thread->input_end += sprintf(thread->input_end, "\t\tEAP:Code = Response\n");
@@ -312,7 +318,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = %s\n", thread->nas_port_type);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
      thread->input_end += sprintf(thread->input_end, "TX-End\n");
@@ -328,7 +334,7 @@ radcl_client_prepare(radcl_thread_t * thread, int ap_id, int ssid_id)
      thread->input_end += sprintf(thread->input_end, "\tAVP:Called-Station-Id = %s\n", thread->called_station_id);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Calling-Station-Id = %s\n", thread->calling_station_id);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Framed-MTU = 1400\n");
-     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = Wireless-802.11\n");
+     thread->input_end += sprintf(thread->input_end, "\tAVP:NAS-Port-Type = %s\n", thread->nas_port_type);
      thread->input_end += sprintf(thread->input_end, "\tAVP:Connect-Info = CONNECT 11Mbps 802.11b\n");
      thread->input_end += sprintf(thread->input_end, "\tAVP:Message-Authenticator = Auto\n");
      thread->input_end += sprintf(thread->input_end, "TX-End\n");
@@ -788,9 +794,9 @@ main(int argc, const char * argv[])
   server_udp_port = RADIUS_PORT;
   output_filename = NULL;
   user_conf_filename = NULL;
-  num_ue = 0;
+  num_ue = 1;
   num_ap = 1;
-  num_ssid = 0;
+  num_ssid = 1;
   num_concurrent = 1;
   show_auth_summary = 1;
 
@@ -802,10 +808,10 @@ main(int argc, const char * argv[])
 	    "\t--my-ip <ddd.ddd.ddd.ddd>\t\t\t\t[required if --ap is greater than 1]\n"
 	    "\t--my-udp <my-udp-port>\t\t\t[optional]\n"
 	    "\t--output <filename>\t\t\t[not supported]\n"
-	    "\t--ue <num>\t\t\t\t[# of UEs, optional, default:%d]\n"
+	    "\t--ue <num>\t\t\t\t[# of Clients, optional, default:%d]\n"
 	    "\t--user-conf <conf>\t\t\t[triplets file]\n"
 	    "\t--ap <num>\t\t\t\t[# of APs or radius clients, default:%d]\n"
-	    "\t--ssid <num>\t\t\t\t[# of ssid, default:%d]\n"
+	    "\t--ssid <num>\t\t\t\t[# of ssid, default:%d   0: wired client]\n"
 	    "\t--concurrent <num>\t\t\t[# of concurrent sessions, default:%d]\n"
 	    "\t--password <password>\t\t\t[radius shared secret, default:%s\n"
 	    "\t--no-auth-summary\t\t\t[default display auth summary, optional]\n"
